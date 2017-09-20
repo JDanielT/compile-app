@@ -14,14 +14,13 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "uploaded_class")
-public class UploadedClass implements BaseEntity {
+public class UploadFile implements BaseEntity {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @Column(name = "name_fully_qualified")
-    private String nameFullyQualified;
+    private String name;
     
     @Column(columnDefinition = "TEXT")
     private String source;
@@ -35,12 +34,12 @@ public class UploadedClass implements BaseEntity {
         this.id = id;
     }
 
-    public String getNameFullyQualified() {
-        return nameFullyQualified;
+    public String getName() {
+        return name;
     }
 
-    public void setNameFullyQualified(String nameFullyQualified) {
-        this.nameFullyQualified = nameFullyQualified;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getSource() {
@@ -69,7 +68,7 @@ public class UploadedClass implements BaseEntity {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final UploadedClass other = (UploadedClass) obj;
+        final UploadFile other = (UploadFile) obj;
         return Objects.equals(this.id, other.id);
     }
     

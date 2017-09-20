@@ -21,7 +21,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 
-import br.com.zone.compile.app.model.UploadedClass;
+import br.com.zone.compile.app.model.UploadFile;
 import br.com.zone.compile.app.util.EntityManagerProducer;
 
 /**
@@ -43,14 +43,14 @@ public class CompileService implements Serializable {
         this.diagnostics = diagnostics;
     }
     
-    public boolean compileSource(UploadedClass clazz) throws ClassNotFoundException, IOException {
+    public boolean compileSource(UploadFile clazz) throws ClassNotFoundException, IOException {
 
         boolean result = false;
 
         final String CLASS_DIRECTORY = "WEB-INF/classes/";
 
-        String directoryDeployClass = getDirectory(clazz.getNameFullyQualified());
-        String classeName = getClassName(clazz.getNameFullyQualified());
+        String directoryDeployClass = getDirectory(clazz.getName());
+        String classeName = getClassName(clazz.getName());
 
         String directorySource = getRealPath("/") + CLASS_DIRECTORY.concat(directoryDeployClass);
 
@@ -86,7 +86,7 @@ public class CompileService implements Serializable {
         if (!task.call()) {
             diagnostics = diagnosticsCollector.getDiagnostics();            
         } else {
-            Class.forName(clazz.getNameFullyQualified());
+            Class.forName(clazz.getName());
             entityManagerProducer.reload();
             result = true;
         }
@@ -103,7 +103,7 @@ public class CompileService implements Serializable {
         return nfq.substring(nfq.lastIndexOf(".") + 1);
     }
 
-    private String getRealPath(String resource) {
+    public static String getRealPath(String resource) {
         return ((ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext()).getRealPath(resource);
     }
 

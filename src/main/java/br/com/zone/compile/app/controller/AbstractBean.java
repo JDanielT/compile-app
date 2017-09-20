@@ -20,13 +20,16 @@ import javax.inject.Named;
  */
 @Named
 @ViewScoped
-public abstract class AbstractBean implements Serializable {
+public class AbstractBean implements Serializable {
 
     private String className;
     
     private BaseEntity entity;
     protected Collection<BaseEntity> itens;
     
+    @Inject
+    private GenericRepository repository;
+
     @Inject
     private FacesMessages messages;
 
@@ -48,7 +51,7 @@ public abstract class AbstractBean implements Serializable {
 
     public Collection<BaseEntity> getItens() {
         if (itens == null) {
-            itens = getRepository().listarTodos();
+            itens = getRepository().listarTodos(getEntityClass());
         }
         return itens;
     }
@@ -96,7 +99,7 @@ public abstract class AbstractBean implements Serializable {
 
         try {
 
-            getRepository().excluir(entity);
+            getRepository().excluir(entity, getEntityClass());
 
         } catch (Exception ex) {
             messages.error("Esse registro está sendo utilizado em outra tabela");
@@ -124,6 +127,7 @@ public abstract class AbstractBean implements Serializable {
         entity = null;
     }
 
-    protected abstract GenericRepository getRepository();
-    
+    protected GenericRepository getRepository() {
+        return repository;
+    }
 }

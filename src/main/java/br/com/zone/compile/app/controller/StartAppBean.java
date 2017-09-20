@@ -1,5 +1,6 @@
 package br.com.zone.compile.app.controller;
 
+import br.com.zone.compile.app.model.BaseEntity;
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
@@ -11,8 +12,8 @@ import javax.inject.Inject;
 
 import org.omnifaces.cdi.Eager;
 
-import br.com.zone.compile.app.model.UploadedClass;
-import br.com.zone.compile.app.repository.UploadedClassRepository;
+import br.com.zone.compile.app.model.UploadFile;
+import br.com.zone.compile.app.repository.GenericRepository;
 import br.com.zone.compile.app.service.CompileService;
 import br.com.zone.compile.app.util.FacesMessages;
 import java.io.Serializable;
@@ -25,21 +26,20 @@ public class StartAppBean implements Serializable {
     private CompileService compileService;
 
     @Inject
-    private UploadedClassRepository repository;
+    private GenericRepository repository;
 
     @Inject
     private FacesMessages messages;
 
     @PostConstruct
     public void init() {
-        System.out.println(" **************************** INICIOU ******************************* ");
-        List<UploadedClass> classes = repository.listarTodos();
+        List<BaseEntity> classes = repository.listarTodos(UploadFile.class);
         if (classes != null && !classes.isEmpty()) {
             classes.forEach(c -> {
                 try {
-                    compileService.compileSource(c);
+                    compileService.compileSource((UploadFile)c);
                 } catch (ClassNotFoundException | IOException ex) {
-                    Logger.getLogger(UploadClassBean.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, ex);
                     messages.error("Um erro ocorreu " + ex.getMessage());
                 }
             });

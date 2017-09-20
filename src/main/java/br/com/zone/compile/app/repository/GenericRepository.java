@@ -1,89 +1,79 @@
 package br.com.zone.compile.app.repository;
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import br.com.zone.compile.app.model.BaseEntity;
+import br.com.zone.compile.app.util.Transacional;
 
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-
-import br.com.zone.compile.app.model.BaseEntity;
-import br.com.zone.compile.app.util.Transacional;
+import java.io.Serializable;
+import java.util.List;
+import javax.inject.Inject;
 
 /**
  *
  * @author daniel
  * @param <T>
  */
-public class GenericRepository<T extends BaseEntity> implements Serializable {
+public class GenericRepository implements Serializable {
 
     @Inject
-    private EntityManager em;
-
-    private final Class<T> entityClass;
-
-    public GenericRepository(Class<T> entityClass) {
-        this.entityClass = entityClass;
-    }
+    private EntityManager manager;
 
     @Transacional
-    public void salvar(T t) {
+    public void salvar(BaseEntity t) throws Exception {
         if (t.getId() == null) {
-            em.persist(t);
+            manager.persist(t);
         } else {
-            em.merge(t);
+            manager.merge(t);
         }
     }
 
     @Transacional
-    public void excluir(BaseEntity entity) {
-        T entityToBeRemoved = em.find(entityClass, entity.getId());
-        em.remove(entityToBeRemoved);
+    public void excluir(BaseEntity entity, Class entityClass) throws Exception {
+        BaseEntity entityToBeRemoved = (BaseEntity) manager.find(entityClass, entity.getId());
+        manager.remove(entityToBeRemoved);
     }
 
-    public T buscarPorId(Object id) {
-        T resultado = em.find(entityClass, id);
-        return resultado;
-    }
-    
-    @SuppressWarnings("unchecked")
-    protected Serializable buscarUmResultado(String namedQuery, Object... params) {
-        Serializable result = null;
-        try {
-            Query q = em.createNamedQuery(namedQuery);
-            for (int i = 0; i < params.length; i++) {
-                q.setParameter(i + 1, params[i]);
-            }
-            result = (Serializable) q.getSingleResult();
-        } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "Nenhum resultado retornado pela consulta");
-        }
-        return result;
+    @Transacional
+    public BaseEntity buscarPorId(Object id, Class entityClass) {
+        return (BaseEntity) manager.find(entityClass, id);
     }
 
+    @Transacional
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public List<T> listarTodos() {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<T> cq = cb.createQuery(entityClass);
-        Root<T> root = cq.from(entityClass);
+    public List<BaseEntity> listarTodos(Class entityClass) {
+        CriteriaBuilder cb = manager.getCriteriaBuilder();
+        CriteriaQuery<BaseEntity> cq = cb.createQuery(entityClass);
+        Root<BaseEntity> root = cq.from(entityClass);
         cq.orderBy(cb.asc(root.get("id")));
         cq.select(root);
-        List<T> resultado = em.createQuery(cq).getResultList();
+        List<BaseEntity> resultado = manager.createQuery(cq).getResultList();
         return resultado;
     }
 
-    protected List<T> listar(String namedQuery, Object... params) {
-        Query q = em.createNamedQuery(namedQuery);
+    @Transacional
+    protected List<BaseEntity> listar(String namedQuery, Object... params) {
+        Query q = manager.createNamedQuery(namedQuery);
         for (int i = 0; i < params.length; i++) {
             q.setParameter(i + 1, params[i]);
         }
-        List<T> resultado = q.getResultList();
+        List<BaseEntity> resultado = q.getResultList();
         return resultado;
+    }
+
+    @Transacional
+    @SuppressWarnings("unchecked")
+    protected BaseEntity buscarUmResultado(String namedQuery, Object... params) {
+        BaseEntity result = null;
+        Query q = manager.createNamedQuery(namedQuery);
+        for (int i = 0; i < params.length; i++) {
+            q.setParameter(i + 1, params[i]);
+        }
+        result = (BaseEntity) q.getSingleResult();
+        return result;
     }
 
 }
