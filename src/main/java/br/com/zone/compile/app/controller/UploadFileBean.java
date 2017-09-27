@@ -77,13 +77,17 @@ public class UploadFileBean implements Serializable {
 
     public void uploadXhtml() {
         try {
+            
+            final String FORMATO = ".xhtml";
+            
             File root = new File(CompileService.getRealPath("/"));
-            File file = new File(root, uploadedFile.getName().concat(".xhtml"));
+            File file = new File(root, uploadedFile.getName().concat(FORMATO));
             Files.write(file.toPath(), uploadedFile.getSource().getBytes(StandardCharsets.UTF_8));
 
             messages.info("Código enviado com sucesso");
 
             try {
+                uploadedFile.setName(uploadedFile.getName().concat(FORMATO));
                 repository.salvar(uploadedFile);
                 uploadedFile = new UploadFile();
             } catch (Exception ex) {
