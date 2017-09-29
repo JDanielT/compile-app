@@ -32,7 +32,7 @@ public class CompileService implements Serializable {
 
     @Inject
     private EntityManagerProducer entityManagerProducer;
-    		    
+    
     private List<Diagnostic<? extends JavaFileObject>> diagnostics;
 
     public List<Diagnostic<? extends JavaFileObject>> getDiagnostics() {
@@ -46,47 +46,66 @@ public class CompileService implements Serializable {
     public boolean compileSource(UploadFile clazz) throws ClassNotFoundException, IOException {
 
         boolean result = false;
-
+        
+        //Todos os .class devem ser colocados nesse diretório após a compilação
         final String CLASS_DIRECTORY = "WEB-INF/classes/";
-
+        
+        //Buscando o diretório onde a classe ficará baseada no nome do pacote
         String directoryDeployClass = getDirectory(clazz.getName());
+        
+        //Buscando o nome da classe não qualificado (sem o prefixo de pacotes)
         String classeName = getClassName(clazz.getName());
 
+        //Buscando o diretório onde os fontes .java estão. Vide comentários do getRealPath 
         String directorySource = getRealPath("/") + CLASS_DIRECTORY.concat(directoryDeployClass);
 
+        //Salvando .java enviado no diretório de sources
         File root = new File(directorySource);
         File sourceFile = new File(root, classeName.concat(".java"));
         Files.write(sourceFile.toPath(), clazz.getSource().getBytes(StandardCharsets.UTF_8));
-
+        
+        //Listando arquivos do diretório source a fim de usá-los no classpath para compilaçao do código enviado
         File[] javaFiles = new File(directorySource).listFiles();
         List<File> javaFilesList = new ArrayList<>();
 
+        //Filtrando apenas arquivos .java (evita que .class sejam adicionado ao classpath que causaria um erro)
         for (File javaFile : javaFiles) {
             if (javaFile.getName().endsWith(".java")) {
                 javaFilesList.add(javaFile);
             }
         }
 
+        //Recuperando instância do compilador
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-
+        
+        //Lista para armazenar possíveis erros de compilação
         DiagnosticCollector<JavaFileObject> diagnosticsCollector = new DiagnosticCollector<>();
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticsCollector, null, null);
 
+        //Mapeando os arquivos .java encontrados no classpath para objetos Java
         Iterable<? extends JavaFileObject> compilationUnits = fileManager.getJavaFileObjectsFromFiles(javaFilesList);
 
+        //Adicionando libs do projeto ao classpath
         List<File> classpath = new ArrayList<>();
         classpath.addAll(Arrays.asList(new File(getRealPath("/WEB-INF/lib/")).listFiles()));
         classpath.add(new File(directorySource + directoryDeployClass + classeName + ".class"));
 
+        //Setando classpath ao fileManager
         fileManager.setLocation(StandardLocation.CLASS_PATH, classpath);
+        
+        //Setando o diretório de saída da compilação do arquivo enviado
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File(getRealPath("/") + CLASS_DIRECTORY)));
 
+        //Compilando arquivo
         JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticsCollector, null, null, compilationUnits);
-
+        
+        //Se retornar false, então temos erros de compilação que são adicionados ao 'diagnostics'
         if (!task.call()) {
             diagnostics = diagnosticsCollector.getDiagnostics();            
         } else {
+            // Caso a compilação seja executada com sucesso, carrega a classe rescem compilada
             Class.forName(clazz.getName());
+            // Força um reload do hibernate a fim de criar tabelas no banco, caso necessário
             entityManagerProducer.reload();
             result = true;
         }
@@ -95,14 +114,26 @@ public class CompileService implements Serializable {
 
     }
 
+    /**
+     * Método para recuperar o diretório de uma classe, baseado na nomeclatura dos pacotes.
+     * @return String contendo o diretório
+     */
     private String getDirectory(String nfq) {
         return nfq.substring(0, nfq.lastIndexOf(".")).replaceAll("\\.", Matcher.quoteReplacement(File.separator));
     }
 
+    /**
+     * Recupera o nome da classe (sem o prexifo de pacotes).
+     * @return String com o nome da classe não qualificado
+     */
     private String getClassName(String nfq) {
         return nfq.substring(nfq.lastIndexOf(".") + 1);
     }
 
+    /**
+     * Busca o caminho absoluto de onte a aplicação está sendo executada.
+     * @return String com o caminho de execução da app
+     */
     public static String getRealPath(String resource) {
         return ((ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext()).getRealPath(resource);
     }
