@@ -11,11 +11,11 @@
         <h1>Upload de código</h1>
 
         <p:tabView>
-            
-            <p:tab title="Upload - Java">
 
-                <h:form id="frmUploadJava" prependId="false" >
-                    
+            <p:tab title="Upload">
+
+                <h:form id="frmUpload" prependId="false" >
+
                     <p:messages id="msgs" />
 
                     <p:toolbar id="toolbar">
@@ -35,10 +35,18 @@
                                 <span class="ui-icon ui-icon-grip-dotted-vertical" />
                             </span>
 
+                            <ui:repeat  value="#{menuBean.uploadFiles}"
+                                        var="file" >
+                                
+                                <h:link outcome="#{file.name}"
+                                        value="#{file.name.replaceAll('.xhtml', '')}" />
+                                
+                            </ui:repeat>
+
                         </f:facet>
                     </p:toolbar>
 
-                    <p:dialog header="Upload JAVA" 
+                    <p:dialog header="Upload" 
                               widgetVar="sourceDialog" 
                               id="source-dialog"
                               resizable="false" 
@@ -48,35 +56,68 @@
                         <p:messages id="msgs-dialog" />
                         <p:defaultCommand target="salvar-button" scope="source-dialog" />
 
-                        <p:scrollPanel style="width: 700px; height: 430px">
+                        <p:scrollPanel style="width: 900px; height: 600px; border: 0">
 
-                            <h:panelGrid id="painel-dialog">
+                            <p:fieldset legend="Source Java" >
 
-                                <h:panelGroup>
-                                    <h:outputText value="Nome totalmente qualificado" /><br/>
-                                    <p:inputText value="#{uploadFileBean.uploadedFile.name}" 
-                                                 required="true"
-                                                 requiredMessage="O nome da classe deve ser informado" />
-                                </h:panelGroup>
+                                <h:panelGrid id="painel-dialog-java">
 
-                                <h:panelGroup>
-                                    <h:outputText value="Source" /><br/>
-                                    <p:inputTextarea value="#{uploadFileBean.uploadedFile.source}" 
-                                                     cols="80"
-                                                     rows="20" 
+                                    <h:panelGroup>
+                                        <h:outputText value="Nome totalmente qualificado" /><br/>
+                                        <p:inputText value="#{uploadFileBean.sourceJava.name}" 
                                                      required="true"
-                                                     requiredMessage="O campo source é requerido"
-                                                     autoResize="false" />
-                                </h:panelGroup>
+                                                     requiredMessage="O nome da classe deve ser informado" />
+                                    </h:panelGroup>
 
-                                <p:commandButton id="salvar-button"
-                                                 value="Ok"
-                                                 actionListener="#{uploadFileBean.compileSouce}"
-                                                 update="msgs msgs-dialog painel-dialog"
-                                                 process="source-dialog"
-                                                 oncomplete="if (!args.validationFailed) PF('sourceDialog').hide()" />
+                                    <h:panelGroup>
+                                        <h:outputText value="Source" /><br/>
+                                        <p:inputTextarea value="#{uploadFileBean.sourceJava.source}" 
+                                                         cols="80"
+                                                         rows="12" 
+                                                         required="true"
+                                                         requiredMessage="O campo source é requerido"
+                                                         autoResize="false" />
+                                    </h:panelGroup>
 
-                            </h:panelGrid>
+                                </h:panelGrid>
+
+                            </p:fieldset>
+
+                            <br/>
+
+                            <p:fieldset legend="Source XHTML" >
+
+                                <h:panelGrid id="painel-dialog-xhtml">
+
+                                    <h:panelGroup>
+                                        <h:outputText value="Nome arquivo (sem extensão)" /><br/>
+                                        <p:inputText value="#{uploadFileBean.sourceXhtml.name}" 
+                                                     required="true"
+                                                     requiredMessage="O nome do arquivo deve ser informado" />
+                                    </h:panelGroup>
+
+                                    <h:panelGroup>
+                                        <h:outputText value="Source" /><br/>
+                                        <p:inputTextarea value="#{uploadFileBean.sourceXhtml.source}" 
+                                                         cols="80"
+                                                         rows="12" 
+                                                         required="true"
+                                                         requiredMessage="O campo source é requerido"
+                                                         autoResize="false" />
+                                    </h:panelGroup>
+
+                                </h:panelGrid>
+
+                            </p:fieldset>
+
+                            <br/>
+
+                            <p:commandButton id="salvar-button"
+                                             value="Enviar"
+                                             actionListener="#{uploadFileBean.upload()}"
+                                             update="msgs msgs-dialog painel-dialog-java painel-dialog-xhtml"
+                                             process="source-dialog"
+                                             oncomplete="if (!args.validationFailed) PF('sourceDialog').hide()" />
 
                         </p:scrollPanel>
 
@@ -85,81 +126,7 @@
                 </h:form>
 
             </p:tab>
-            
-            <p:tab title="Upload - XHTML">
 
-                <h:form id="frmUploadXhtml" prependId="false" >
-                    
-                    <p:messages id="msgsXhtml" />
-
-                    <p:toolbar id="toolbarXhtml">
-                        <f:facet name="left">
-
-                            <p:commandButton value="Novo" 
-                                             icon="ui-icon-document"
-                                             process="@this" 
-                                             update="xhtml-dialog"
-                                             oncomplete="PF('xhtmlDialog').show()">
-
-                                <p:resetInput target="xhtml-dialog" />
-
-                            </p:commandButton>
-
-                            <span class="ui-separator">
-                                <span class="ui-icon ui-icon-grip-dotted-vertical" />
-                            </span>
-
-                        </f:facet>
-                    </p:toolbar>
-
-                    <p:dialog header="Upload XHTML" 
-                              widgetVar="xhtmlDialog" 
-                              id="xhtml-dialog"
-                              resizable="false" 
-                              modal="true" 
-                              closeOnEscape="true" >
-
-                        <p:messages id="msgs-dialog-xhtml" />
-                        <p:defaultCommand target="salvar-button-xhtml" scope="xhtml-dialog" />
-
-                        <p:scrollPanel style="width: 700px; height: 430px">
-
-                            <h:panelGrid id="painel-dialog-xhtml">
-
-                                <h:panelGroup>
-                                    <h:outputText value="Nome arquivo (sem extensão)" /><br/>
-                                    <p:inputText value="#{uploadFileBean.uploadedFile.name}" 
-                                                 required="true"
-                                                 requiredMessage="O nome do arquivo deve ser informado" />
-                                </h:panelGroup>
-
-                                <h:panelGroup>
-                                    <h:outputText value="Source" /><br/>
-                                    <p:inputTextarea value="#{uploadFileBean.uploadedFile.source}" 
-                                                     cols="80"
-                                                     rows="20" 
-                                                     required="true"
-                                                     requiredMessage="O campo source é requerido"
-                                                     autoResize="false" />
-                                </h:panelGroup>
-
-                                <p:commandButton id="salvar-button-xhtml"
-                                                 value="Ok"
-                                                 actionListener="#{uploadFileBean.uploadXhtml}"
-                                                 update="msgsXhtml msgs-dialog-xhtml painel-dialog-xhtml"
-                                                 process="xhtml-dialog"
-                                                 oncomplete="if (!args.validationFailed) PF('xhtmlDialog').hide()" />
-
-                            </h:panelGrid>
-
-                        </p:scrollPanel>
-
-                    </p:dialog>
-
-                </h:form>
-                
-            </p:tab>
-            
         </p:tabView>
 
     </ui:define>

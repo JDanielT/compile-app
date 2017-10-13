@@ -6,8 +6,6 @@ import java.util.logging.Logger;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
 
 import br.com.zone.compile.app.model.UploadFile;
 import br.com.zone.compile.app.repository.GenericRepository;
@@ -31,7 +29,8 @@ public class UploadFileBean implements Serializable {
     @Inject
     private FacesMessages messages;
 
-    private UploadFile uploadedFile;
+    private UploadFile sourceJava;
+    private UploadFile sourceXhtml;
 
     @Inject
     private CompileService compileService;
@@ -41,64 +40,55 @@ public class UploadFileBean implements Serializable {
 
     @PostConstruct
     public void init() {
-        uploadedFile = new UploadFile();
+        sourceJava = new UploadFile();
+        sourceXhtml = new UploadFile();
     }
 
-    public UploadFile getUploadedFile() {
-        return uploadedFile;
+    public UploadFile getSourceJava() {
+        return sourceJava;
     }
 
-    public void setUploadedFile(UploadFile uploadedFile) {
-        this.uploadedFile = uploadedFile;
+    public void setSourceJava(UploadFile sourceJava) {
+        this.sourceJava = sourceJava;
     }
 
-    public void compileSouce() {
+    public UploadFile getSourceXhtml() {
+        return sourceXhtml;
+    }
+
+    public void setSourceXhtml(UploadFile sourceXhtml) {
+        this.sourceXhtml = sourceXhtml;
+    }
+
+    public void upload() {
         try {
-            if (compileService.compileSource(uploadedFile)) {
-                messages.info("Código compilado com sucesso");
-                try {
-                    repository.salvar(uploadedFile);
-                    uploadedFile = new UploadFile();
-                } catch (Exception ex) {
-                    Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, ex);
-                    messages.error("Um erro ocorreu ao persistir o código" + ex.getMessage());
-                }
-            } else {
-                for (Diagnostic<? extends JavaFileObject> diagnostic : compileService.getDiagnostics()) {
-                    messages.error("Um erro ocorreu na compilação do arquivo" + diagnostic.getMessage(null));
-                    Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, diagnostic.getMessage(null));
-                }
-            }
-        } catch (ClassNotFoundException | IOException ex) {
-            Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, ex);
-            messages.error("Um erro ocorreu " + ex.getMessage());
-        }
-    }
-
-    public void uploadXhtml() {
-        try {
-            
-            final String FORMATO = ".xhtml";
-            
-            File root = new File(CompileService.getRealPath("/"));
-            File file = new File(root, uploadedFile.getName().concat(FORMATO));
-            Files.write(file.toPath(), uploadedFile.getSource().getBytes(StandardCharsets.UTF_8));
-
+            this.uploadJava();
+            this.uploadXhtml();
             messages.info("Código enviado com sucesso");
-
-            try {
-                uploadedFile.setName(uploadedFile.getName().concat(FORMATO));
-                repository.salvar(uploadedFile);
-                uploadedFile = new UploadFile();
-            } catch (Exception ex) {
-                Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, ex);
-                messages.error("Um erro ocorreu ao persistir o código" + ex.getMessage());
-            }
-
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, ex);
-            messages.error("Um erro ocorreu " + ex.getMessage());
+            messages.error("Um erro ocorreu: " + ex.getMessage());
         }
+    }
+
+    private void uploadJava() throws Exception {
+        compileService.compileSource(sourceJava);
+        repository.salvar(sourceJava);
+        sourceJava = new UploadFile();
+    }
+
+    private void uploadXhtml() throws IOException, Exception {
+
+        final String FORMATO = ".xhtml";
+
+        File root = new File(CompileService.getRealPath("/"));
+        File file = new File(root, sourceXhtml.getName().concat(FORMATO));
+        Files.write(file.toPath(), sourceXhtml.getSource().getBytes(StandardCharsets.UTF_8));
+
+        sourceXhtml.setName(sourceXhtml.getName().concat(FORMATO));
+        repository.salvar(sourceXhtml);
+        sourceXhtml = new UploadFile();
+
     }
 
 }
