@@ -38,7 +38,7 @@ public class StartAppBean implements Serializable {
     public void init() {
         List<BaseEntity> classes = repository.listarTodos(UploadFile.class);
         if (classes != null && !classes.isEmpty()) {
-
+            
             final String FORMATO = ".xhtml";
 
             classes.forEach(c -> {
@@ -52,11 +52,11 @@ public class StartAppBean implements Serializable {
                         compileService.compileSource(f);
 
                     } else {
-
+                        
                         File root = new File(CompileService.getRealPath("/"));
-                        File file = new File(root, f.getName().concat(FORMATO));
+                        File file = new File(root, f.getName());
                         Files.write(file.toPath(), f.getSource().getBytes(StandardCharsets.UTF_8));
-
+                        
                     }
 
                 } catch (ClassNotFoundException | IOException ex) {
