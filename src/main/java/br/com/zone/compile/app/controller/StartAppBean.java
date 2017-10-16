@@ -20,8 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.inject.Named;
 
-@Eager
+@Named
 @ApplicationScoped
 public class StartAppBean implements Serializable {
 
@@ -30,9 +31,6 @@ public class StartAppBean implements Serializable {
 
     @Inject
     private GenericRepository repository;
-
-    @Inject
-    private FacesMessages messages;
 
     @PostConstruct
     public void init() {
