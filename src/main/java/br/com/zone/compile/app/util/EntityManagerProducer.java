@@ -1,7 +1,7 @@
 package br.com.zone.compile.app.util;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.persistence.EntityManager;
@@ -18,7 +18,7 @@ public class EntityManagerProducer {
     }
 
     @Produces
-    @RequestScoped
+    @SessionScoped
     public EntityManager createEntityManager() {
         return this.factory.createEntityManager();
     }

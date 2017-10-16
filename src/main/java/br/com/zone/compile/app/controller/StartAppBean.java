@@ -8,12 +8,9 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.omnifaces.cdi.Eager;
-
 import br.com.zone.compile.app.model.UploadFile;
 import br.com.zone.compile.app.repository.GenericRepository;
 import br.com.zone.compile.app.service.CompileService;
-import br.com.zone.compile.app.util.FacesMessages;
 import java.io.File;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
@@ -32,37 +29,45 @@ public class StartAppBean implements Serializable {
     @Inject
     private GenericRepository repository;
 
-    @PostConstruct
+    private boolean isStarted = Boolean.FALSE;;
+
     public void init() {
-        List<BaseEntity> classes = repository.listarTodos(UploadFile.class);
-        if (classes != null && !classes.isEmpty()) {
+        if (!isStarted) {
             
-            final String FORMATO = ".xhtml";
+            isStarted = Boolean.TRUE;
+            
+            List<BaseEntity> classes = repository.listarTodos(UploadFile.class);
+            if (classes != null && !classes.isEmpty()) {
 
-            classes.forEach(c -> {
+                final String FORMATO = ".xhtml";
 
-                UploadFile f = (UploadFile) c;
+                classes.forEach(c -> {
 
-                try {
+                    UploadFile f = (UploadFile) c;
 
-                    if (!f.getName().endsWith(FORMATO)) {
+                    try {
 
-                        compileService.compileSource(f);
+                        if (!f.getName().endsWith(FORMATO)) {
 
-                    } else {
-                        
-                        File root = new File(CompileService.getRealPath("/"));
-                        File file = new File(root, f.getName());
-                        Files.write(file.toPath(), f.getSource().getBytes(StandardCharsets.UTF_8));
-                        
+                            compileService.compileSource(f);
+
+                        } else {
+
+                            File root = new File(CompileService.getRealPath("/"));
+                            File file = new File(root, f.getName());
+                            Files.write(file.toPath(), f.getSource().getBytes(StandardCharsets.UTF_8));
+
+                        }
+
+                    } catch (ClassNotFoundException | IOException ex) {
+                        Logger.getLogger(StartAppBean.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-                } catch (ClassNotFoundException | IOException ex) {
-                    Logger.getLogger(StartAppBean.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            });
+                });
+            }
+            
         }
+        
     }
 
 }
