@@ -16,7 +16,7 @@
 
 		<div style="float: right; margin-top: 5px">
 
-			<h:form prependId="false">
+			<h:form id="formMenu" prependId="false">
 
 				<ui:repeat value="#{menuBean.uploadFiles}" var="file">
 
@@ -28,7 +28,7 @@
 
 				</ui:repeat>
 
-				<p:commandButton value="Upload" action="Upload.xhtml" />
+				<p:commandButton value="Upload" action="Upload.xhtml?faces-redirect=true" />
 
 			</h:form>
 
