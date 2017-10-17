@@ -39,16 +39,6 @@
                                 <span class="ui-icon ui-icon-grip-dotted-vertical" />
                             </span>
 
-                            <ui:repeat  value="#{menuBean.uploadFiles}"
-                                        var="file" >
-                                
-                                <h:link outcome="#{file.name}"
-                                        value="#{file.name.replaceAll('.xhtml', '')}" />
-                                
-                                <span style="width: 5px" ></span>
-                                
-                            </ui:repeat>
-
                         </f:facet>
                     </p:toolbar>
 
