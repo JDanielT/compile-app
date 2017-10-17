@@ -9,7 +9,7 @@
             <property name="javax.persistence.jdbc.password" value="123456"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>            
-            <property name="hibernate.archive.autodetection" value="class" />
+            <property name="hibernate.archive.autodetection" value="class, hbm"/>
         </properties>
     </persistence-unit>
 </persistence>
