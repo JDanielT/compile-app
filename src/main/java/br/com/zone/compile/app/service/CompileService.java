@@ -23,6 +23,7 @@ import javax.tools.ToolProvider;
 
 import br.com.zone.compile.app.model.UploadFile;
 import br.com.zone.compile.app.util.EntityManagerProducer;
+import org.jboss.logging.Logger;
 
 /**
  *
@@ -32,7 +33,7 @@ public class CompileService implements Serializable {
 
     @Inject
     private EntityManagerProducer entityManagerProducer;
-    
+
     private List<Diagnostic<? extends JavaFileObject>> diagnostics;
 
     public List<Diagnostic<? extends JavaFileObject>> getDiagnostics() {
@@ -42,42 +43,50 @@ public class CompileService implements Serializable {
     public void setDiagnostics(List<Diagnostic<? extends JavaFileObject>> diagnostics) {
         this.diagnostics = diagnostics;
     }
-    
+
     public boolean compileSource(UploadFile clazz) throws ClassNotFoundException, IOException {
 
         boolean result = false;
-        
+
         //Todos os .class devem ser colocados nesse diretório após a compilação
         final String CLASS_DIRECTORY = "WEB-INF/classes/";
-        
+
         //Buscando o diretório onde a classe ficará baseada no nome do pacote
         String directoryDeployClass = getDirectory(clazz.getName());
-        
+
+        Logger.getLogger(CompileService.class.getName()).log(Logger.Level.INFO, "CLASS DIRECTORY " + directoryDeployClass);
+
         //Buscando o nome da classe não qualificado (sem o prefixo de pacotes)
         String classeName = getClassName(clazz.getName());
 
         //Buscando o diretório onde os fontes .java estão. Vide comentários do getRealPath 
         String directorySource = getRealPath("/") + CLASS_DIRECTORY.concat(directoryDeployClass);
 
+        Logger.getLogger(CompileService.class.getName()).log(Logger.Level.INFO, "SOURCE DIRECTORY " + directorySource);
+
         //Salvando .java enviado no diretório de sources
         File root = new File(directorySource);
         File sourceFile = new File(root, classeName.concat(".java"));
         Files.write(sourceFile.toPath(), clazz.getSource().getBytes(StandardCharsets.UTF_8));
-        
+
         //Listando arquivos do diretório source a fim de usá-los no classpath para compilaçao do código enviado
         File[] javaFiles = new File(directorySource).listFiles();
+        
+        Logger.getLogger(CompileService.class.getName()).log(Logger.Level.INFO, "SOURCE DIRECTORY " + new File(directorySource).getAbsolutePath());
+        
         List<File> javaFilesList = new ArrayList<>();
 
         //Filtrando apenas arquivos .java (evita que .class sejam adicionado ao classpath que causaria um erro)
         for (File javaFile : javaFiles) {
             if (javaFile.getName().endsWith(".java")) {
+                Logger.getLogger(CompileService.class.getName()).log(Logger.Level.INFO, ".Java Files " + javaFile.getAbsolutePath());
                 javaFilesList.add(javaFile);
             }
         }
 
         //Recuperando instância do compilador
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        
+
         //Lista para armazenar possíveis erros de compilação
         DiagnosticCollector<JavaFileObject> diagnosticsCollector = new DiagnosticCollector<>();
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticsCollector, null, null);
@@ -92,16 +101,16 @@ public class CompileService implements Serializable {
 
         //Setando classpath ao fileManager
         fileManager.setLocation(StandardLocation.CLASS_PATH, classpath);
-        
+
         //Setando o diretório de saída da compilação do arquivo enviado
         fileManager.setLocation(StandardLocation.CLASS_OUTPUT, Arrays.asList(new File(getRealPath("/") + CLASS_DIRECTORY)));
 
         //Compilando arquivo
         JavaCompiler.CompilationTask task = compiler.getTask(null, fileManager, diagnosticsCollector, null, null, compilationUnits);
-        
+
         //Se retornar false, então temos erros de compilação que são adicionados ao 'diagnostics'
         if (!task.call()) {
-            diagnostics = diagnosticsCollector.getDiagnostics();            
+            diagnostics = diagnosticsCollector.getDiagnostics();
         } else {
             // Caso a compilação seja executada com sucesso, carrega a classe rescem compilada
             Class.forName(clazz.getName());
@@ -115,7 +124,9 @@ public class CompileService implements Serializable {
     }
 
     /**
-     * Método para recuperar o diretório de uma classe, baseado na nomeclatura dos pacotes.
+     * Método para recuperar o diretório de uma classe, baseado na nomeclatura
+     * dos pacotes.
+     *
      * @return String contendo o diretório
      */
     private String getDirectory(String nfq) {
@@ -124,6 +135,7 @@ public class CompileService implements Serializable {
 
     /**
      * Recupera o nome da classe (sem o prexifo de pacotes).
+     *
      * @return String com o nome da classe não qualificado
      */
     private String getClassName(String nfq) {
@@ -132,6 +144,7 @@ public class CompileService implements Serializable {
 
     /**
      * Busca o caminho absoluto de onte a aplicação está sendo executada.
+     *
      * @return String com o caminho de execução da app
      */
     public static String getRealPath(String resource) {

@@ -5,6 +5,10 @@
                 xmlns:f="http://xmlns.jcp.org/jsf/core"
                 xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
                 xmlns:p="http://primefaces.org/ui">
+    
+    <f:metadata>
+        <f:event type="preRenderView" listener="#{startAppBean.init()}"/>
+    </f:metadata>
 
     <ui:define name="corpo">
 
@@ -34,14 +38,6 @@
                             <span class="ui-separator">
                                 <span class="ui-icon ui-icon-grip-dotted-vertical" />
                             </span>
-
-                            <ui:repeat  value="#{menuBean.uploadFiles}"
-                                        var="file" >
-                                
-                                <h:link outcome="#{file.name}"
-                                        value="#{file.name.replaceAll('.xhtml', '')}" />
-                                
-                            </ui:repeat>
 
                         </f:facet>
                     </p:toolbar>
@@ -115,7 +111,7 @@
                             <p:commandButton id="salvar-button"
                                              value="Enviar"
                                              actionListener="#{uploadFileBean.upload()}"
-                                             update="msgs msgs-dialog painel-dialog-java painel-dialog-xhtml toolbar"
+                                             update="msgs msgs-dialog painel-dialog-java painel-dialog-xhtml formMenu"
                                              process="source-dialog"
                                              oncomplete="if (!args.validationFailed) PF('sourceDialog').hide()" />
 

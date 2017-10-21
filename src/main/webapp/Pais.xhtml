@@ -88,12 +88,18 @@
                 <p:ajax event="rowSelect" update=":frm:toolbar" />
                 <p:ajax event="rowUnselect" update=":frm:toolbar" />
 
-                <p:column headerText="ID" > 
-                    #{item.id}
+                <p:column>
+	                <f:facet name="header">
+	                	ID
+	                </f:facet> 
+                    <h:outputText value="#{item.id}" />
                 </p:column>
 
-                <p:column headerText="Nome">
-                    #{item.nome}
+                <p:column>
+                	<f:facet name="header">
+	               		Nome
+	                </f:facet>
+                    <h:outputText value="#{item.nome}" />
                 </p:column>
 
             </p:dataTable>

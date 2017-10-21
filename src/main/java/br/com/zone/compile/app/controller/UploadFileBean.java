@@ -15,8 +15,12 @@ import java.io.File;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
+import java.util.Locale;
 import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
+import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 
 /**
  *
@@ -62,7 +66,14 @@ public class UploadFileBean implements Serializable {
 
     public void upload() {
         try {
-            this.uploadJava();
+            if (!this.uploadJava()) {
+                List<Diagnostic<? extends JavaFileObject>> diagnostics = compileService.getDiagnostics();
+                messages.error("Ocorreram erros de compilação");
+                diagnostics.forEach(d -> {
+                    messages.error("Erro: " + d.getMessage(Locale.ENGLISH));
+                });
+                return;
+            }
             this.uploadXhtml();
             messages.info("Código enviado com sucesso");
         } catch (Exception ex) {
@@ -71,10 +82,13 @@ public class UploadFileBean implements Serializable {
         }
     }
 
-    private void uploadJava() throws Exception {
-        compileService.compileSource(sourceJava);
-        repository.salvar(sourceJava);
-        sourceJava = new UploadFile();
+    private boolean uploadJava() throws Exception {
+        boolean resultado;
+        if (resultado = compileService.compileSource(sourceJava)) {
+            repository.salvar(sourceJava);
+            sourceJava = new UploadFile();
+        }
+        return resultado;
     }
 
     private void uploadXhtml() throws IOException, Exception {

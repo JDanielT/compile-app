@@ -37,12 +37,10 @@ public class GenericRepository implements Serializable {
         manager.remove(entityToBeRemoved);
     }
 
-    @Transacional
     public BaseEntity buscarPorId(Object id, Class entityClass) {
         return (BaseEntity) manager.find(entityClass, id);
     }
 
-    @Transacional
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<BaseEntity> listarTodos(Class entityClass) {
         CriteriaBuilder cb = manager.getCriteriaBuilder();
@@ -54,7 +52,6 @@ public class GenericRepository implements Serializable {
         return resultado;
     }
 
-    @Transacional
     protected List<BaseEntity> listar(String namedQuery, Object... params) {
         Query q = manager.createNamedQuery(namedQuery);
         for (int i = 0; i < params.length; i++) {
@@ -64,7 +61,6 @@ public class GenericRepository implements Serializable {
         return resultado;
     }
 
-    @Transacional
     @SuppressWarnings("unchecked")
     protected BaseEntity buscarUmResultado(String namedQuery, Object... params) {
         BaseEntity result = null;

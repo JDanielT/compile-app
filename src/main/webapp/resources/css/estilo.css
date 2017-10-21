@@ -10,10 +10,16 @@ body {
 header {
 	padding: 5px;
 	margin-bottom: 20px;
-	height: 30px;
+	height: 40px;
 	background-color: #545454;
 	color: #fff;
 	box-shadow: 0px 2px 2px #ccc
+}
+
+.text-header {
+	color: white !important;
+	font-size: 15px;
+	margin-right: 5px;
 }
 
 #conteudo {
