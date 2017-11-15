@@ -1,5 +1,6 @@
 package br.com.zone.compile.app.controller;
 
+import br.com.zone.compile.app.model.BaseEntity;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +37,9 @@ public class UploadFileBean implements Serializable {
     private UploadFile sourceJava;
     private UploadFile sourceXhtml;
 
+    //Variável para operações de edição e exclusão
+    private UploadFile selected;
+
     @Inject
     private CompileService compileService;
 
@@ -64,14 +68,18 @@ public class UploadFileBean implements Serializable {
         this.sourceXhtml = sourceXhtml;
     }
 
+    public UploadFile getSelected() {
+        return selected;
+    }
+
+    public void setSelected(UploadFile selected) {
+        this.selected = selected;
+    }
+
     public void upload() {
         try {
             if (!this.uploadJava()) {
-                List<Diagnostic<? extends JavaFileObject>> diagnostics = compileService.getDiagnostics();
-                messages.error("Ocorreram erros de compilação");
-                diagnostics.forEach(d -> {
-                    messages.error("Erro: " + d.getMessage(Locale.ENGLISH));
-                });
+                this.showErrosCompilation();
                 return;
             }
             this.uploadXhtml();
@@ -80,6 +88,14 @@ public class UploadFileBean implements Serializable {
             Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, ex);
             messages.error("Um erro ocorreu: " + ex.getMessage());
         }
+    }
+
+    private void showErrosCompilation() {
+        List<Diagnostic<? extends JavaFileObject>> diagnostics = compileService.getDiagnostics();
+        messages.error("Ocorreram erros de compilação");
+        diagnostics.forEach(d -> {
+            messages.error("Erro: " + d.getMessage(Locale.ENGLISH));
+        });
     }
 
     private boolean uploadJava() throws Exception {
@@ -103,6 +119,41 @@ public class UploadFileBean implements Serializable {
         repository.salvar(sourceXhtml);
         sourceXhtml = new UploadFile();
 
+    }
+    
+    public List<BaseEntity> getItens(){
+        return repository.listarTodos(UploadFile.class);
+    }
+
+    public void preEdicao(){
+        if(selected.getName().endsWith(".xhtml")){
+            selected.setName(selected.getName().replaceAll(".xhtml", ""));
+        }
+    }
+    
+    public void editar() {
+        try {
+            if (compileService.compileSource(selected)) {
+                repository.salvar(selected);
+                selected = new UploadFile();
+                messages.info("Código enviado com sucesso");
+            }else{
+                this.showErrosCompilation();
+            }
+        } catch (Exception ex) {
+            Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, ex);
+            messages.error("Um erro ocorreu: " + ex.getMessage());
+        }
+    }
+    
+    public void excluir(){
+        try {
+            repository.excluir(selected, UploadFile.class);
+            messages.info("Código excluído com sucesso");
+        } catch (Exception ex) {
+            Logger.getLogger(UploadFileBean.class.getName()).log(Level.SEVERE, null, ex);
+            messages.error("Um erro ocorreu: " + ex.getMessage());
+        }
     }
 
 }
