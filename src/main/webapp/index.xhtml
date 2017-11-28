@@ -49,7 +49,7 @@
                     </p:commandButton>
 
                     <p:commandButton icon="ui-icon-trash" title="Excluir"
-                                     process="@this" update="classes-table msgs toolbar"
+                                     process="@this" update="classes-table msgs toolbar formMenu"
                                      action="#{classeBean.excluir()}"
                                      disabled="#{classeBean.entity == null}" >
 
@@ -211,7 +211,7 @@
                                              id="salvar-atributo-button"
                                              action="#{classeBean.adicionarAtributo()}"
                                              process="painel-atributo"
-                                             update="msgs-dialog painel-atributo atributos-table formMenu" />
+                                             update="msgs-dialog painel-atributo atributos-table" />
 
                         </p:panel>
 
@@ -221,7 +221,7 @@
                                      id="salvar-button"
                                      action="#{classeBean.salvar()}"
                                      process="painel-dialog" 
-                                     update="msgs msgs-dialog painel-dialog classes-table"
+                                     update="msgs msgs-dialog painel-dialog classes-table formMenu"
                                      oncomplete="if (!args.validationFailed) PF('classeDialog').hide()" />
 
                 </h:panelGrid>
