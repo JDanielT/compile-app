@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -30,7 +31,10 @@ public class Classe implements BaseEntity {
     public final static String CLASS_NAME = "_CLASS_NAME_";
     public final static String TABLE_NAME = "_TABLE_NAME_";
     public final static String ATTR_START = "_ATTR_START_";
-
+    public final static String COLUMNS_START_TABLE = "_COLUMNS_START_TABLE_";
+    public final static String FIELDS_START = "_FIELDS_START_";
+    public final static String TO_STRING = "_TO_STRING_";
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -40,6 +44,9 @@ public class Classe implements BaseEntity {
 
     @OneToMany(mappedBy = "classe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Atributo> atributos;
+
+    @OneToMany(mappedBy = "classe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<UploadFile> files;
 
     @Override
     public Long getId() {
@@ -64,6 +71,14 @@ public class Classe implements BaseEntity {
 
     public void setAtributos(List<Atributo> atributos) {
         this.atributos = atributos;
+    }
+
+    public List<UploadFile> getFiles() {
+        return files;
+    }
+
+    public void setFiles(List<UploadFile> files) {
+        this.files = files;
     }
 
     public String toJava() {
@@ -92,22 +107,133 @@ public class Classe implements BaseEntity {
                     for (Atributo atributo : atributos) {
 
                         String nomeAtributo = atributo.getNome();
-                        
-                        linha = linha.concat("\nprivate " + atributo.getTipo().getCodigo() + " " + atributo.getNome() + ";");
 
-                        linha = linha.concat("\npublic " + atributo.getTipo().getCodigo() + " get" + this.capitalize(nomeAtributo) + "(){ return " + nomeAtributo +"; }");
-                        
-                        linha = linha.concat("\npublic void set" + this.capitalize(nomeAtributo) + "(" + atributo.getTipo().getCodigo() + " param) { " + nomeAtributo +" = param; }");
+                        linha = linha.concat("\nprivate " + atributo.getTipo() + " " + atributo.getNome() + ";");
+
+                        linha = linha.concat("\npublic " + atributo.getTipo() + " get" + this.capitalize(nomeAtributo) + "(){ return " + nomeAtributo + "; }");
+
+                        linha = linha.concat("\npublic void set" + this.capitalize(nomeAtributo) + "(" + atributo.getTipo() + " param) { " + nomeAtributo + " = param; }");
 
                     }
 
+                }
+                
+                if(linha.contains(TO_STRING)){
+
+                    linha = linha.concat("\npublic String toString(){ return ");
+                    
+                    for (Atributo atributo : atributos) {
+                        linha = linha.concat( "" + (atributo.isMain() ? atributo.getNome() + " " : ""));
+                    }
+                    
+                    linha = linha.concat("; }");
+                    
                 }
 
                 classe.add(linha);
 
             }
 
-            classe.forEach(linha -> retorno.append(linha));
+            classe.forEach(linha -> {
+                retorno.append(linha);
+            });
+
+        } catch (IOException ex) {
+            Logger.getLogger(Classe.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return retorno.toString();
+
+    }
+
+    public String toXHTML() {
+
+        StringBuilder retorno = new StringBuilder();
+
+        Path path = Paths.get(getClass().getClassLoader().getResource("META-INF/template-xhtml").getFile());
+
+        try {
+
+            List<String> template = Files.readAllLines(path);
+            List<String> xhtml = new ArrayList<>();
+
+            for (String linha : template) {
+
+                if (linha.contains(Classe.CLASS_NAME)) {
+                    linha = linha.replaceAll(Classe.CLASS_NAME, this.nome);
+                }
+
+                if (linha.contains(Classe.TABLE_NAME)) {
+                    linha = linha.replaceAll(Classe.TABLE_NAME, this.nome.toLowerCase());
+                }
+
+                if (linha.contains(Classe.COLUMNS_START_TABLE) && atributos != null) {
+
+                    for (Atributo atributo : atributos) {
+
+                        String nomeAtributo = atributo.getNome();
+                        String rotuloAtributo = atributo.getRotulo();
+
+                        String column = "\n<p:column headerText=\"" + rotuloAtributo + "\" >\n"
+                                        + "<h:outputText value=\"#{item." + nomeAtributo + "}\" />\n"
+                                        + "</p:column>";
+
+                        linha = linha.concat(column);
+
+                    }
+
+                }
+
+                if (linha.contains(Classe.FIELDS_START) && atributos != null) {
+
+                    for (Atributo atributo : atributos) {
+
+                        String nomeAtributo = atributo.getNome();
+                        String rotuloAtributo = atributo.getRotulo();
+                        String tipo = atributo.getTipo();
+
+                        String input = null;
+
+                        if (tipo.endsWith(Atributo.DATE)) {
+
+                            input = "\n<div>\n"
+                                    + "<p:outputLabel value=\"" + rotuloAtributo + "\" /><br/>\n"
+                                    + "<p:inputMask id=\"date\" value=\"#{abstractBean.entity." + nomeAtributo + "}\" mask=\"99/99/9999\" >\n"
+                                    + "<f:convertDateTime pattern=\"dd/MM/yyyy\" />"
+                                    + "</p:inputMask>"
+                                    + "</div>";
+
+                        } else if (!Arrays.asList(Atributo.tipos).contains(tipo)) {
+
+                            input = "\n<div>\n"
+                                    + "<p:outputLabel value=\"" + rotuloAtributo + "\" /><br/>\n"
+                                    + "<p:selectOneMenu value=\"#{abstractBean.entity." + nomeAtributo + "}\" converter=\"simpleEntityConverter\" >\n"
+                                    + "<f:selectItems value=\"#{abstractBean.repository.listarTodos('br.com.zone.compile.app.model." + tipo + "')}\" "
+                                    + " var=\"item\" itemLabel=\"#{item.toString()}\" itemValue=\"#{item}\" /> "
+                                    + "</p:selectOneMenu>\n"
+                                    + "</div>";
+
+                        } else {
+
+                            input = "\n<div>\n"
+                                    + "<p:outputLabel value=\"" + rotuloAtributo + "\" /><br/>\n"
+                                    + "<p:inputText value=\"#{abstractBean.entity." + nomeAtributo + "}\">\n"
+                                    + "</p:inputText>"
+                                    + "</div>";
+
+                        }
+
+                        linha = linha.concat(input);
+
+                    }
+
+                }
+
+                xhtml.add(linha);
+
+            }
+
+            xhtml.forEach(linha -> retorno.append(linha));
 
         } catch (IOException ex) {
             Logger.getLogger(Classe.class.getName()).log(Level.SEVERE, null, ex);
@@ -142,5 +268,5 @@ public class Classe implements BaseEntity {
         final Classe other = (Classe) obj;
         return Objects.equals(this.id, other.id);
     }
-
+    
 }

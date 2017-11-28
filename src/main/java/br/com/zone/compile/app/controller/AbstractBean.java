@@ -125,9 +125,9 @@ public class AbstractBean implements Serializable {
     public void limparDados() {
         itens = null;
         entity = null;
-    }
+   }
 
-    protected GenericRepository getRepository() {
+    public GenericRepository getRepository() {
         return repository;
     }
 }

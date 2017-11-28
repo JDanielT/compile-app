@@ -51,6 +51,17 @@ public class GenericRepository implements Serializable {
         List<BaseEntity> resultado = manager.createQuery(cq).getResultList();
         return resultado;
     }
+    
+    public List<BaseEntity> listarTodos(String className) throws ClassNotFoundException {
+        Class clazz = Class.forName(className);
+        CriteriaBuilder cb = manager.getCriteriaBuilder();
+        CriteriaQuery<BaseEntity> cq = cb.createQuery(clazz);
+        Root<BaseEntity> root = cq.from(clazz);
+        cq.orderBy(cb.asc(root.get("id")));
+        cq.select(root);
+        List<BaseEntity> resultado = manager.createQuery(cq).getResultList();
+        return resultado;
+    }
 
     protected List<BaseEntity> listar(String namedQuery, Object... params) {
         Query q = manager.createNamedQuery(namedQuery);

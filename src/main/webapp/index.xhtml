@@ -48,11 +48,6 @@
 
                     </p:commandButton>
 
-                    <p:commandButton icon="ui-icon-print" 
-                                     actionListener="#{classeBean.entity.toJava()}"
-                                     title="Impŕimir código java" 
-                                     disabled="#{classeBean.entity == null}" />
-
                     <p:commandButton icon="ui-icon-trash" title="Excluir"
                                      process="@this" update="classes-table msgs toolbar"
                                      action="#{classeBean.excluir()}"
@@ -195,7 +190,7 @@
                                                      value="#{classeBean.atributo.tipo}" >
 
                                         <f:selectItems value="#{classeBean.tiposAtributos}" />
-
+                                        
                                     </p:selectOneMenu>
                                 </div>
 
@@ -216,7 +211,7 @@
                                              id="salvar-atributo-button"
                                              action="#{classeBean.adicionarAtributo()}"
                                              process="painel-atributo"
-                                             update="msgs-dialog painel-atributo atributos-table" />
+                                             update="msgs-dialog painel-atributo atributos-table formMenu" />
 
                         </p:panel>
 

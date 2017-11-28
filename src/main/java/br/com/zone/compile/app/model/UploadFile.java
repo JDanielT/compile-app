@@ -6,6 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 /**
@@ -24,6 +26,10 @@ public class UploadFile implements BaseEntity {
     
     @Column(columnDefinition = "TEXT")
     private String source;
+    
+    @ManyToOne
+    @JoinColumn(name = "classe_id", referencedColumnName = "id")
+    private Classe classe;
 
     @Override
     public Long getId() {
@@ -48,6 +54,14 @@ public class UploadFile implements BaseEntity {
 
     public void setSource(String source) {
         this.source = source;
+    }
+
+    public Classe getClasse() {
+        return classe;
+    }
+
+    public void setClasse(Classe classe) {
+        this.classe = classe;
     }
 
     @Override

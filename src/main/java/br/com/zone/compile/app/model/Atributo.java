@@ -2,15 +2,11 @@ package br.com.zone.compile.app.model;
 
 import java.util.Objects;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -22,6 +18,14 @@ import javax.persistence.UniqueConstraint;
 @Table(name = "atributo", uniqueConstraints=@UniqueConstraint(columnNames={"id", "rotulo"}))
 public class Atributo implements BaseEntity {
     
+    //Tipos pre definidos
+    public static final String STRING = "String";
+    public static final String INTEGER = "Integer";
+    public static final String DOUBLE = "Double";
+    public static final String DATE = "Date";
+    
+    public static String[] tipos = {STRING, INTEGER, DOUBLE, DATE};
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -30,8 +34,7 @@ public class Atributo implements BaseEntity {
     
     private String rotulo;
     
-    @Enumerated(EnumType.STRING)
-    private TipoAtributo tipo;
+    private String tipo;
     
     private boolean main = Boolean.FALSE;
     
@@ -64,11 +67,11 @@ public class Atributo implements BaseEntity {
         this.rotulo = rotulo;
     }
 
-    public TipoAtributo getTipo() {
+    public String getTipo() {
         return tipo;
     }
 
-    public void setTipo(TipoAtributo tipo) {
+    public void setTipo(String tipo) {
         this.tipo = tipo;
     }
 

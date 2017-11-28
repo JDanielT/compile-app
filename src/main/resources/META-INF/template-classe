@@ -44,4 +44,6 @@ public class _CLASS_NAME_ implements BaseEntity {
         return Objects.equals(this.id, other.id);
     }
 
+    //_TO_STRING_
+
 }

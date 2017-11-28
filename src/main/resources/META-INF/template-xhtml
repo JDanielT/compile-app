@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<ui:composition template="/WEB-INF/templates/Layout.xhtml"
+                xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://xmlns.jcp.org/jsf/html"
+                xmlns:f="http://xmlns.jcp.org/jsf/core"
+                xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://xmlns.jcp.org/jsp/jstl/core">
+
+    <ui:define name="corpo">
+
+        <h1>_CLASS_NAME_</h1>
+
+        <h:form id="frm">
+
+            <c:set value="br.com.zone.compile.app.model._CLASS_NAME_" 
+                   target="#{abstractBean}" 
+                   property="className" />
+
+            <p:messages id="msgs" />
+
+            <p:toolbar id="toolbar">
+
+                <f:facet name="left">
+
+                    <p:commandButton value="Novo" 
+                                     icon="ui-icon-document"
+                                     action="#{abstractBean.preCadastro()}"
+                                     process="@this" 
+                                     update="_TABLE_NAME_-dialog"
+                                     oncomplete="PF('_TABLE_NAME_Dialog').show()">
+
+                        <p:resetInput target="_TABLE_NAME_-dialog" />
+
+                    </p:commandButton>
+
+                    <span class="ui-separator">
+                        <span class="ui-icon ui-icon-grip-dotted-vertical" />
+                    </span>
+
+                    <p:commandButton icon="ui-icon-pencil" 
+                                     title="Editar" 
+                                     process="@this" 
+                                     update="_TABLE_NAME_-dialog"
+                                     oncomplete="PF('_TABLE_NAME_Dialog').show()"
+                                     disabled="#{abstractBean.entity == null}">
+
+                        <p:resetInput target="painel-dialog" />
+
+                    </p:commandButton>
+
+                    <p:commandButton icon="ui-icon-trash" title="Excluir"
+                                     process="@this" update="_TABLE_NAME_-table msgs toolbar"
+                                     action="#{abstractBean.excluir()}"
+                                     disabled="#{abstractBean.entity == null}" >
+
+                        <p:confirm icon="ui-icon-alert" 
+                                   header="Confirmação de exclusão"
+                                   message="Tem certeza que deseja excluir esse registro?" />
+
+                    </p:commandButton>
+
+                    <p:commandButton icon="ui-icon-arrowthick-1-s" 
+                                     title="Exportar para XLS"
+                                     ajax="false" 
+                                     immediate="true" >
+
+                        <p:dataExporter type="xls" target="_TABLE_NAME_-table" fileName="_TABLE_NAME_s" />
+
+                    </p:commandButton>
+                </f:facet>
+            </p:toolbar>
+
+            <hr/>
+
+            <p:dataTable id="_TABLE_NAME_-table"
+                         value="#{abstractBean.itens}" 
+                         var="item"
+                         emptyMessage="Não há registros" 
+                         selection="#{abstractBean.entity}"
+                         paginator="true" 
+                         rows="10"
+                         paginatorPosition="bottom"
+                         style="margin-top: 10px"
+                         selectionMode="single"
+                         rowKey="#{item.id}">
+                
+                <p:ajax event="rowSelect" update=":frm:toolbar" />
+                <p:ajax event="rowUnselect" update=":frm:toolbar" />
+
+                <!--_COLUMNS_START_TABLE_-->
+
+            </p:dataTable>
+                        
+            <p:dialog header="Novo _TABLE_NAME_" 
+                      id="_TABLE_NAME_-dialog"
+                      widgetVar="_TABLE_NAME_Dialog" 
+                      resizable="false" 
+                      modal="true"
+                      dynamic="true"
+                      closeOnEscape="true" >
+
+                <p:messages id="msgs-dialog" />
+                <p:defaultCommand target="salvar-button" scope="_TABLE_NAME_-dialog" />
+
+                <h:panelGrid columns="2" 
+                             id="painel-dialog" >
+                    
+                    <!--_FIELDS_START_-->
+                    
+                    <p:commandButton value="Salvar" 
+                                     id="salvar-button"
+                                     action="#{abstractBean.salvar()}"
+                                     process="_TABLE_NAME_-dialog" 
+                                     update="msgs-dialog painel-dialog _TABLE_NAME_-table"
+                                     oncomplete="if (!args.validationFailed) PF('_TABLE_NAME_Dialog').hide()" />
+                </h:panelGrid>
+                
+            </p:dialog>
+
+        </h:form>
+
+    </ui:define>
+</ui:composition>
