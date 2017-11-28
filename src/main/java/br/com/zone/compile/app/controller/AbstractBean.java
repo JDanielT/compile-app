@@ -31,7 +31,7 @@ public class AbstractBean implements Serializable {
     private GenericRepository repository;
 
     @Inject
-    private FacesMessages messages;
+    protected FacesMessages messages;
 
     public String getClassName() {
         return className;

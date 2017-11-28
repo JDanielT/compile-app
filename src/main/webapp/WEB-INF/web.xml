@@ -15,7 +15,7 @@
     </context-param>
     
     <welcome-file-list>
-        <welcome-file>Upload.xhtml</welcome-file>
+        <welcome-file>index.xhtml</welcome-file>
     </welcome-file-list>
 
     <listener>

@@ -13,7 +13,7 @@ import javax.persistence.Table;
  * @author daniel
  */
 @Entity
-@Table(name = "uploaded_class")
+@Table(name = "uploaded_file")
 public class UploadFile implements BaseEntity {
     
     @Id

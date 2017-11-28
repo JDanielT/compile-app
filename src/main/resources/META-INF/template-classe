@@ -1,25 +1,15 @@
 package br.com.zone.compile.app.model;
 
-import java.util.Objects;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import java.util.*;
+import javax.persistence.*;
 
-/**
- *
- * @author daniel
- */
 @Entity
-@Table(name = "pai")
-public class Pai implements BaseEntity {
-    
+@Table(name = "_TABLE_NAME_")
+public class _CLASS_NAME_ implements BaseEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    private String nome;
 
     @Override
     public Long getId() {
@@ -30,18 +20,12 @@ public class Pai implements BaseEntity {
         this.id = id;
     }
 
-    public String getNome() {
-        return nome;
-    }
-
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    //_ATTR_START_
 
     @Override
     public int hashCode() {
-        int hash = 5;
-        hash = 83 * hash + Objects.hashCode(this.id);
+        int hash = 7;
+        hash = 19 * hash + Objects.hashCode(this.id);
         return hash;
     }
 
@@ -56,8 +40,8 @@ public class Pai implements BaseEntity {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final Pai other = (Pai) obj;
+        final _CLASS_NAME_ other = (_CLASS_NAME_) obj;
         return Objects.equals(this.id, other.id);
     }
-    
+
 }
