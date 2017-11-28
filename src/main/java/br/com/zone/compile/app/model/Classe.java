@@ -84,8 +84,11 @@ public class Classe implements BaseEntity {
     public String toJava() {
 
         StringBuilder retorno = new StringBuilder();
-
-        Path path = Paths.get(getClass().getClassLoader().getResource("META-INF/template-classe").getFile());
+        
+        boolean IS_WINDOWS = System.getProperty("os.name").contains("indow");
+        String caminho = getClass().getClassLoader().getResource("META-INF/template-classe").getFile();
+        
+        Path path = Paths.get(IS_WINDOWS ? caminho.substring(1) : caminho);
 
         try {
 
@@ -150,7 +153,10 @@ public class Classe implements BaseEntity {
 
         StringBuilder retorno = new StringBuilder();
 
-        Path path = Paths.get(getClass().getClassLoader().getResource("META-INF/template-xhtml").getFile());
+        boolean IS_WINDOWS = System.getProperty("os.name").contains("indow");
+        String caminho = getClass().getClassLoader().getResource("META-INF/template-xhtml").getFile();
+        
+        Path path = Paths.get(IS_WINDOWS ? caminho.substring(1) : caminho);
 
         try {
 
