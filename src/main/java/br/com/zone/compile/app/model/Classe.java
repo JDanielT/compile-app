@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -125,9 +126,7 @@ public class Classe implements BaseEntity {
 
                     linha = linha.concat("\npublic String toString(){ return ");
                     
-                    for (Atributo atributo : atributos) {
-                        linha = linha.concat( "" + (atributo.isMain() ? atributo.getNome() + " " : ""));
-                    }
+                    linha = linha.concat(concatAtrrs(atributos.stream().filter(a -> a.isMain()).collect(Collectors.toList())));
                     
                     linha = linha.concat("; }");
                     
@@ -147,6 +146,14 @@ public class Classe implements BaseEntity {
 
         return retorno.toString();
 
+    }
+    
+    private String concatAtrrs(List<Atributo> atributos){
+        String retorno = new String();
+        for(int i = 0; i < atributos.size(); i++){
+            retorno = retorno + atributos.get(i).getNome() + (atributos.size() == i  + 1 ? "" : " + \" - \" + ");
+        }
+        return retorno;
     }
 
     public String toXHTML() {
