@@ -12,7 +12,7 @@
         <h1>Classes</h1>
 
         <h:form id="frmClasses" prependId="false" >
-            
+
             <c:set value="br.com.zone.compile.app.model.Classe" 
                    target="#{classeBean}" 
                    property="className" />
@@ -114,12 +114,27 @@
                 <h:panelGrid columns="1" 
                              id="painel-dialog" >
 
-                    <p:outputLabel value="Nome da Classe" for="nome" />
-                    <p:inputText id="nome"
-                                 maxlength="80" 
-                                 value="#{classeBean.entity.nome}"
-                                 required="true"
-                                 requiredMessage="Campo nome é requerido" />
+                    <div>
+
+                        <p:outputLabel value="Nome da Classe" for="nome" />
+                        <p:inputText id="nome"
+                                     maxlength="80" 
+                                     value="#{classeBean.entity.nome}"
+                                     required="true"
+                                     requiredMessage="Campo nome da classe é requerido" />
+
+                    </div>
+
+                    <div>
+
+                        <p:outputLabel value="Rótulo da Classe" for="rotuloClasse" />
+                        <p:inputText id="rotuloClasse"
+                                     maxlength="80" 
+                                     value="#{classeBean.entity.rotulo}"
+                                     required="true"
+                                     requiredMessage="Campo rótulo da classe é requerido" />
+
+                    </div>
 
                     <br/>
 
@@ -164,7 +179,7 @@
                                  header="Novo Atributo">
 
                             <h:panelGrid columns="4" >
-                                
+
                                 <div>
 
                                     <p:outputLabel value="Nome" for="nome-atributo" /><br/>
@@ -190,7 +205,7 @@
                                                      value="#{classeBean.atributo.tipo}" >
 
                                         <f:selectItems value="#{classeBean.tiposAtributos}" />
-                                        
+
                                     </p:selectOneMenu>
                                 </div>
 

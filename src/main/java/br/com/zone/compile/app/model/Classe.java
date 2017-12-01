@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import javax.persistence.Table;
 public class Classe implements BaseEntity {
 
     public final static String CLASS_NAME = "_CLASS_NAME_";
+    public final static String CLASS_LABEL = "_CLASS_LABEL_";
     public final static String TABLE_NAME = "_TABLE_NAME_";
     public final static String ATTR_START = "_ATTR_START_";
     public final static String COLUMNS_START_TABLE = "_COLUMNS_START_TABLE_";
@@ -39,15 +41,18 @@ public class Classe implements BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Column(length = 80)
+    private String rotulo;
 
     @Column(length = 80)
     private String nome;
 
     @OneToMany(mappedBy = "classe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<Atributo> atributos;
+    private Set<Atributo> atributos;
 
     @OneToMany(mappedBy = "classe", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    private List<UploadFile> files;
+    private Set<UploadFile> files;
 
     @Override
     public Long getId() {
@@ -58,6 +63,14 @@ public class Classe implements BaseEntity {
         this.id = id;
     }
 
+    public String getRotulo() {
+        return rotulo;
+    }
+
+    public void setRotulo(String rotulo) {
+        this.rotulo = rotulo;
+    }
+    
     public String getNome() {
         return nome;
     }
@@ -66,19 +79,19 @@ public class Classe implements BaseEntity {
         this.nome = nome;
     }
 
-    public List<Atributo> getAtributos() {
+    public Set<Atributo> getAtributos() {
         return atributos;
     }
 
-    public void setAtributos(List<Atributo> atributos) {
+    public void setAtributos(Set<Atributo> atributos) {
         this.atributos = atributos;
     }
 
-    public List<UploadFile> getFiles() {
+    public Set<UploadFile> getFiles() {
         return files;
     }
 
-    public void setFiles(List<UploadFile> files) {
+    public void setFiles(Set<UploadFile> files) {
         this.files = files;
     }
 
@@ -101,7 +114,7 @@ public class Classe implements BaseEntity {
                 if (linha.contains(Classe.CLASS_NAME)) {
                     linha = linha.replaceAll(Classe.CLASS_NAME, this.nome);
                 }
-
+                
                 if (linha.contains(Classe.TABLE_NAME)) {
                     linha = linha.replaceAll(Classe.TABLE_NAME, this.nome.toLowerCase());
                 }
@@ -172,6 +185,10 @@ public class Classe implements BaseEntity {
 
             for (String linha : template) {
 
+                if (linha.contains(Classe.CLASS_LABEL)) {
+                    linha = linha.replaceAll(Classe.CLASS_LABEL, this.rotulo);
+                }
+                
                 if (linha.contains(Classe.CLASS_NAME)) {
                     linha = linha.replaceAll(Classe.CLASS_NAME, this.nome);
                 }
@@ -221,7 +238,8 @@ public class Classe implements BaseEntity {
                             input = "\n<div>\n"
                                     + "<p:outputLabel value=\"" + rotuloAtributo + "\" /><br/>\n"
                                     + "<p:selectOneMenu value=\"#{abstractBean.entity." + nomeAtributo + "}\" converter=\"simpleEntityConverter\" >\n"
-                                    + "<f:selectItems value=\"#{abstractBean.repository.listarTodos('br.com.zone.compile.app.model." + tipo + "')}\" "
+                                    + "\n<f:selectItem itemLabel=\"Selecione\" />"
+                                    + "\n<f:selectItems value=\"#{abstractBean.repository.listarTodos('br.com.zone.compile.app.model." + tipo + "')}\" "
                                     + " var=\"item\" itemLabel=\"#{item.toString()}\" itemValue=\"#{item}\" /> "
                                     + "</p:selectOneMenu>\n"
                                     + "</div>";

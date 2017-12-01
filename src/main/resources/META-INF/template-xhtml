@@ -9,7 +9,7 @@
 
     <ui:define name="corpo">
 
-        <h1>_CLASS_NAME_</h1>
+        <h1>_CLASS_LABEL_</h1>
 
         <h:form id="frm">
 
@@ -92,7 +92,7 @@
 
             </p:dataTable>
                         
-            <p:dialog header="Novo _TABLE_NAME_" 
+            <p:dialog header="Novo(a) _CLASS_LABEL_" 
                       id="_TABLE_NAME_-dialog"
                       widgetVar="_TABLE_NAME_Dialog" 
                       resizable="false" 

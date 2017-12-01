@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -52,8 +53,8 @@ public class ClasseBean extends AbstractBean {
     @Override
     public void preCadastro() {
         super.preCadastro();
-        ((Classe) getEntity()).setAtributos(new ArrayList<>());
-        ((Classe) getEntity()).setFiles(new ArrayList<>());
+        ((Classe) getEntity()).setAtributos(new HashSet<>());
+        ((Classe) getEntity()).setFiles(new HashSet<>());
     }
 
     @Override
@@ -100,8 +101,8 @@ public class ClasseBean extends AbstractBean {
             messages.error("Um erro ocorreu. Erro: " + ex.getMessage());
         }
 
-        super.limparDados();
-
+        limparDados();
+        
         return null;
 
     }
@@ -114,6 +115,12 @@ public class ClasseBean extends AbstractBean {
  
      }
 
+    @Override
+    public void limparDados() {
+        super.limparDados();
+        atributo = new Atributo();
+    }
+    
     /**
      * Métodos relativos a atributos
      */
