@@ -67,7 +67,8 @@ public class UploadFile implements BaseEntity {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 67 * hash + Objects.hashCode(this.id);
+        hash = 17 * hash + Objects.hashCode(this.id);
+        hash = 17 * hash + Objects.hashCode(this.name);
         return hash;
     }
 
@@ -83,7 +84,10 @@ public class UploadFile implements BaseEntity {
             return false;
         }
         final UploadFile other = (UploadFile) obj;
+        if (!Objects.equals(this.name, other.name)) {
+            return false;
+        }
         return Objects.equals(this.id, other.id);
     }
-    
+
 }

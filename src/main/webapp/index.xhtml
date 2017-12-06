@@ -96,6 +96,10 @@
                 <p:column headerText="Nome" >
                     <h:outputText value="#{item.nome}" />
                 </p:column>
+                
+                <p:column headerText="Rótulo" >
+                    <h:outputText value="#{item.rotulo}" />
+                </p:column>
 
             </p:dataTable>
 
@@ -159,9 +163,17 @@
                             </p:column>
 
                             <p:column headerText="Opções"
-                                      style="width: 50px" >
+                                      style="width: 100px" >
 
                                 <center>
+                                    
+                                    <p:commandButton icon="ui-icon-pencil" 
+                                                     title="editar"
+                                                     process="atributos-table"
+                                                     actionListener="#{classeBean.preEditarAtributo(atributo)}" 
+                                                     update="painel-atributo"
+                                                     immediate="true" />
+                                    
                                     <p:commandButton icon="ui-icon-trash" 
                                                      title="excluir"
                                                      process="atributos-table"
@@ -222,7 +234,7 @@
 
                             <hr/>
 
-                            <p:commandButton value="Adicionar Atributo" 
+                            <p:commandButton value="Salvar Atributo" 
                                              id="salvar-atributo-button"
                                              action="#{classeBean.adicionarAtributo()}"
                                              process="painel-atributo"
@@ -236,7 +248,7 @@
                                      id="salvar-button"
                                      action="#{classeBean.salvar()}"
                                      process="painel-dialog" 
-                                     update="msgs msgs-dialog painel-dialog classes-table formMenu"
+                                     update="msgs-dialog painel-dialog classes-table formMenu"
                                      oncomplete="if (!args.validationFailed) PF('classeDialog').hide()" />
 
                 </h:panelGrid>

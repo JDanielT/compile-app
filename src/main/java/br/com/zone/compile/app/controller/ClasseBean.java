@@ -129,10 +129,15 @@ public class ClasseBean extends AbstractBean {
 
             atributo.setClasse((Classe) getEntity());
 
+            ((Classe) getEntity()).getAtributos().remove(atributo);
             ((Classe) getEntity()).getAtributos().add(atributo);
             atributo = new Atributo();
 
         }
+    }
+    
+    public void preEditarAtributo(Atributo a){
+        this.atributo = a;
     }
 
     public void excluirAtributo(Atributo a) {

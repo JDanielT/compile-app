@@ -125,6 +125,10 @@ public class Classe implements BaseEntity {
 
                         String nomeAtributo = atributo.getNome();
 
+                        if(!Arrays.asList(Atributo.tipos).contains(atributo.getTipo())){
+                            linha = linha.concat("@ManyToOne\n@JoinColumn(name = \""+ atributo.getNome() +"_id\", referencedColumnName = \"id\")");
+                        }
+                        
                         linha = linha.concat("\nprivate " + atributo.getTipo() + " " + atributo.getNome() + ";");
 
                         linha = linha.concat("\npublic " + atributo.getTipo() + " get" + this.capitalize(nomeAtributo) + "(){ return " + nomeAtributo + "; }");
