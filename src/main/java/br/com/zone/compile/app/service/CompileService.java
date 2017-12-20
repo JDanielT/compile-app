@@ -22,6 +22,7 @@ import javax.tools.StandardLocation;
 import javax.tools.ToolProvider;
 
 import br.com.zone.compile.app.model.UploadFile;
+import br.com.zone.compile.app.repository.GenericRepository;
 import br.com.zone.compile.app.util.EntityManagerProducer;
 import org.jboss.logging.Logger;
 
@@ -33,7 +34,7 @@ public class CompileService implements Serializable {
 
     @Inject
     private EntityManagerProducer entityManagerProducer;
-
+    
     private List<Diagnostic<? extends JavaFileObject>> diagnostics;
 
     public List<Diagnostic<? extends JavaFileObject>> getDiagnostics() {
@@ -112,7 +113,7 @@ public class CompileService implements Serializable {
         if (!task.call()) {
             diagnostics = diagnosticsCollector.getDiagnostics();
         } else {
-            // Caso a compilação seja executada com sucesso, carrega a classe rescem compilada
+             // Caso a compilação seja executada com sucesso, carrega a classe rescem compilada
             Class.forName(clazz.getName());
             // Força um reload do hibernate a fim de criar tabelas no banco, caso necessário
             entityManagerProducer.reload();

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,11 +38,11 @@ public class Classe implements BaseEntity {
     public final static String COLUMNS_START_TABLE = "_COLUMNS_START_TABLE_";
     public final static String FIELDS_START = "_FIELDS_START_";
     public final static String TO_STRING = "_TO_STRING_";
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+
     @Column(length = 80)
     private String rotulo;
 
@@ -70,7 +71,7 @@ public class Classe implements BaseEntity {
     public void setRotulo(String rotulo) {
         this.rotulo = rotulo;
     }
-    
+
     public String getNome() {
         return nome;
     }
@@ -98,10 +99,10 @@ public class Classe implements BaseEntity {
     public String toJava() {
 
         StringBuilder retorno = new StringBuilder();
-        
+
         boolean IS_WINDOWS = System.getProperty("os.name").contains("indow");
         String caminho = getClass().getClassLoader().getResource("META-INF/template-classe").getFile();
-        
+
         Path path = Paths.get(IS_WINDOWS ? caminho.substring(1) : caminho);
 
         try {
@@ -114,7 +115,7 @@ public class Classe implements BaseEntity {
                 if (linha.contains(Classe.CLASS_NAME)) {
                     linha = linha.replaceAll(Classe.CLASS_NAME, this.nome);
                 }
-                
+
                 if (linha.contains(Classe.TABLE_NAME)) {
                     linha = linha.replaceAll(Classe.TABLE_NAME, this.nome.toLowerCase());
                 }
@@ -125,10 +126,10 @@ public class Classe implements BaseEntity {
 
                         String nomeAtributo = atributo.getNome();
 
-                        if(!Arrays.asList(Atributo.tipos).contains(atributo.getTipo())){
-                            linha = linha.concat("@ManyToOne\n@JoinColumn(name = \""+ atributo.getNome() +"_id\", referencedColumnName = \"id\")");
+                        if (!Arrays.asList(Atributo.tipos).contains(atributo.getTipo())) {
+                            linha = linha.concat("@ManyToOne\n@JoinColumn(name = \"" + atributo.getNome() + "_id\", referencedColumnName = \"id\")");
                         }
-                        
+
                         linha = linha.concat("\nprivate " + atributo.getTipo() + " " + atributo.getNome() + ";");
 
                         linha = linha.concat("\npublic " + atributo.getTipo() + " get" + this.capitalize(nomeAtributo) + "(){ return " + nomeAtributo + "; }");
@@ -138,15 +139,15 @@ public class Classe implements BaseEntity {
                     }
 
                 }
-                
-                if(linha.contains(TO_STRING)){
+
+                if (linha.contains(TO_STRING)) {
 
                     linha = linha.concat("\npublic String toString(){ return ");
-                    
+
                     linha = linha.concat(concatAtrrs(atributos.stream().filter(a -> a.isMain()).collect(Collectors.toList())));
-                    
+
                     linha = linha.concat("; }");
-                    
+
                 }
 
                 classe.add(linha);
@@ -164,11 +165,11 @@ public class Classe implements BaseEntity {
         return retorno.toString();
 
     }
-    
-    private String concatAtrrs(List<Atributo> atributos){
+
+    private String concatAtrrs(List<Atributo> atributos) {
         String retorno = new String();
-        for(int i = 0; i < atributos.size(); i++){
-            retorno = retorno + atributos.get(i).getNome() + (atributos.size() == i  + 1 ? "" : " + \" - \" + ");
+        for (int i = 0; i < atributos.size(); i++) {
+            retorno = retorno + atributos.get(i).getNome() + (atributos.size() == i + 1 ? "" : " + \" - \" + ");
         }
         return retorno;
     }
@@ -179,7 +180,7 @@ public class Classe implements BaseEntity {
 
         boolean IS_WINDOWS = System.getProperty("os.name").contains("indow");
         String caminho = getClass().getClassLoader().getResource("META-INF/template-xhtml").getFile();
-        
+
         Path path = Paths.get(IS_WINDOWS ? caminho.substring(1) : caminho);
 
         try {
@@ -192,7 +193,7 @@ public class Classe implements BaseEntity {
                 if (linha.contains(Classe.CLASS_LABEL)) {
                     linha = linha.replaceAll(Classe.CLASS_LABEL, this.rotulo);
                 }
-                
+
                 if (linha.contains(Classe.CLASS_NAME)) {
                     linha = linha.replaceAll(Classe.CLASS_NAME, this.nome);
                 }
@@ -209,8 +210,8 @@ public class Classe implements BaseEntity {
                         String rotuloAtributo = atributo.getRotulo();
 
                         String column = "\n<p:column headerText=\"" + rotuloAtributo + "\" >\n"
-                                        + "<h:outputText value=\"#{item." + nomeAtributo + "}\" />\n"
-                                        + "</p:column>";
+                                + "<h:outputText value=\"#{item." + nomeAtributo + "}\" />\n"
+                                + "</p:column>";
 
                         linha = linha.concat(column);
 
@@ -278,6 +279,50 @@ public class Classe implements BaseEntity {
 
     }
 
+    public String toDDL() {
+
+        String ddl = "CREATE TABLE " + nome.toLowerCase() + "(";
+        ddl += "id BIGINT NOT NULL AUTO_INCREMENT, ";
+
+        for (Atributo a : atributos) {
+
+            if (a.getTipo().endsWith(Atributo.DATE)) {
+
+                ddl += a.getNome() + " DATE, ";
+
+            } else if (a.getTipo().endsWith(Atributo.DOUBLE)) {
+
+                ddl += a.getNome() + " DOUBLE, ";
+
+            } else if (a.getTipo().endsWith(Atributo.INTEGER)) {
+
+                ddl += a.getNome() + " INT, ";
+
+            } else if (a.getTipo().endsWith(Atributo.STRING)) {
+
+                ddl += a.getNome() + " VARCHAR(255), ";
+
+            } else if (!Arrays.asList(Atributo.tipos).contains(a.getTipo())) {
+
+                String key = this.generateKey();
+                
+                ddl += a.getNome() + "_id BIGINT, KEY FK_" + key + " ("+ a.getNome() +"_id), CONSTRAINT FK_" + key + " FOREIGN KEY (" + a.getNome() + "_id)" + " REFERENCES " + a.getTipo().toLowerCase() + "(id), ";
+
+            }
+
+        }
+
+        ddl += "PRIMARY KEY (id)";
+        ddl += ");";
+        
+        return ddl;
+
+    }
+    
+    public String generateKey(){
+        return String.valueOf(new Random().nextInt(10000));
+    }
+
     private String capitalize(final String s) {
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }
@@ -303,5 +348,5 @@ public class Classe implements BaseEntity {
         final Classe other = (Classe) obj;
         return Objects.equals(this.id, other.id);
     }
-    
+
 }

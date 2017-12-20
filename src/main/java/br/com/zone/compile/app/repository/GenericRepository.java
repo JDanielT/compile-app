@@ -82,5 +82,10 @@ public class GenericRepository implements Serializable {
         result = (BaseEntity) q.getSingleResult();
         return result;
     }
+    
+    @Transacional
+    public void executeUpdateNativeQuery(String q){
+        manager.createNativeQuery(q).executeUpdate();
+    }
 
 }

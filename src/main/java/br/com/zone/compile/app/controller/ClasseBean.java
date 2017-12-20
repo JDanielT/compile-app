@@ -59,15 +59,15 @@ public class ClasseBean extends AbstractBean {
 
     @Override
     public String salvar() {
-        
+
         Classe c = (Classe) getEntity();
-        
-        if(c.getAtributos().stream().filter(a -> a.isMain()).collect(Collectors.toList()).isEmpty()){
+
+        if (c.getAtributos().stream().filter(a -> a.isMain()).collect(Collectors.toList()).isEmpty()) {
             messages.error("É necessário pelo menos um atributo principal!");
             FacesContext.getCurrentInstance().validationFailed();
             return null;
         }
-        
+
         c.getFiles().clear();
 
         UploadFile javaFile = new UploadFile();
@@ -81,15 +81,50 @@ public class ClasseBean extends AbstractBean {
         xhtmlFile.setClasse(c);
 
         try {
-            if (compileService.compileSource(javaFile)) {                
-                
-                this.uploadXhtml(xhtmlFile);                
-                
+            if (compileService.compileSource(javaFile)) {
+
+                if (c.getId() == null) {
+                    repository.executeUpdateNativeQuery(c.toDDL());
+                } else {
+                    c.getAtributos().stream().filter(a -> a.getId() == null).forEach(a -> {
+
+                        String ddl = "ALTER TABLE " + c.getNome().toLowerCase() + " ADD ";
+                        
+                        if (a.getTipo().endsWith(Atributo.DATE)) {
+
+                            ddl += a.getNome() + " DATE ";
+
+                        } else if (a.getTipo().endsWith(Atributo.DOUBLE)) {
+
+                            ddl += a.getNome() + " DOUBLE ";
+
+                        } else if (a.getTipo().endsWith(Atributo.INTEGER)) {
+
+                            ddl += a.getNome() + " INT ";
+
+                        } else if (a.getTipo().endsWith(Atributo.STRING)) {
+
+                            ddl += a.getNome() + " VARCHAR(255) ";
+
+                        } else if (!Arrays.asList(Atributo.tipos).contains(a.getTipo())) {
+
+
+                            ddl += a.getNome() + "_id BIGINT, ADD CONSTRAINT FOREIGN KEY (" + a.getNome() + "_id)" + " REFERENCES " + a.getTipo().toLowerCase() + "(id) ";
+
+                        }
+                                                
+                        repository.executeUpdateNativeQuery(ddl);
+
+                    });
+                }
+
+                this.uploadXhtml(xhtmlFile);
+
                 c.getFiles().add(javaFile);
-                c.getFiles().add(xhtmlFile);                
-                
+                c.getFiles().add(xhtmlFile);
+
                 repository.salvar(c);
-                
+
             } else {
                 messages.error("Ocorreram erros na compilação:");
                 compileService.getDiagnostics().forEach(d -> {
@@ -100,27 +135,35 @@ public class ClasseBean extends AbstractBean {
             Logger.getLogger(ClasseBean.class.getName()).log(Level.SEVERE, null, ex);
             messages.error("Um erro ocorreu. Erro: " + ex.getMessage());
         }
-
-        limparDados();
         
+        limparDados();
+
         return null;
 
     }
+
+    @Override
+    public String excluir() {
+        Classe c = (Classe) getEntity();
+        repository.executeUpdateNativeQuery("DROP DATATABLE "+ c.getNome().toLowerCase());
+        return super.excluir();
+    }
     
+
     private void uploadXhtml(UploadFile xhtml) throws IOException, Exception {
- 
-         File root = new File(CompileService.getRealPath("/"));
-         File file = new File(root, xhtml.getName());
-         Files.write(file.toPath(), xhtml.getSource().getBytes(StandardCharsets.UTF_8));
- 
-     }
+
+        File root = new File(CompileService.getRealPath("/"));
+        File file = new File(root, xhtml.getName());
+        Files.write(file.toPath(), xhtml.getSource().getBytes(StandardCharsets.UTF_8));
+
+    }
 
     @Override
     public void limparDados() {
         super.limparDados();
         atributo = new Atributo();
     }
-    
+
     /**
      * Métodos relativos a atributos
      */
@@ -135,8 +178,8 @@ public class ClasseBean extends AbstractBean {
 
         }
     }
-    
-    public void preEditarAtributo(Atributo a){
+
+    public void preEditarAtributo(Atributo a) {
         this.atributo = a;
     }
 
